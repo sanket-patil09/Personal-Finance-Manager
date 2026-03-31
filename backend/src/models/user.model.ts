@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { ref } from "node:process";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -19,6 +20,18 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    expenses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Expense",
+      },
+    ],
+    incomes: [
+      {
+        ype: mongoose.Schema.Types.ObjectId,
+        ref: "Income",
+      },
+    ],
   },
   { timestamps: true },
 );
