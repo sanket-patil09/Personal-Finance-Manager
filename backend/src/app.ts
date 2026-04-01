@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import clerkRouter from "./routes/clerk.routes";
 import incomeRouter from "./routes/income.routes";
+import expenseRouter from "./routes/expense.routes";
 
 const app = express();
 
@@ -19,5 +20,7 @@ app.use(
 app.use("/api/clerk", clerkRouter);
 
 app.use("/api", incomeRouter);
+
+app.use("/api", expenseRouter);
 
 export default app;
