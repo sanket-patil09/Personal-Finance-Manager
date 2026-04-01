@@ -9,9 +9,12 @@ import {
   fetchIncome,
   updateIncome,
 } from "@/services/income.services";
-import { ITransactionData } from "@/utils/types";
-import { useEffect, useState } from "react";
+import { IChartSeriesPoint, ITransactionData } from "@/utils/types";
+import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "./ui/spinner";
+import * as Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+import { fetchTransactionsList, getChartOptions } from "../utils/helpers";
 
 const Income = () => {
   const { getToken } = useAuth();
@@ -20,6 +23,8 @@ const Income = () => {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [incomeObj, setIncomeObj] = useState<ITransactionData | null>(null);
+  const [seriesData, setSeriesData] = useState<IChartSeriesPoint[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
 
   const handleAddIncome = async (incomeObj: ITransactionData) => {
     try {
@@ -42,6 +47,11 @@ const Income = () => {
       if (!token) return;
       const incomeList = await fetchIncome(token);
       setIncomeList(incomeList);
+
+      const { newSeriesData = [], newCategories = [] } =
+        fetchTransactionsList(incomeList);
+      (setSeriesData(newSeriesData), setCategories(newCategories));
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -79,6 +89,10 @@ const Income = () => {
     handlefetchUserIncome();
   }, []);
 
+  const options: Highcharts.Options = useMemo(() => {
+    return getChartOptions(categories, seriesData);
+  }, [categories, seriesData]);
+
   return (
     <div className="w-[75%] ml-8 mr-8 mt-6">
       <div className="flex w-full justify-between">
@@ -93,6 +107,18 @@ const Income = () => {
           setisEditMode={setIsEditMode}
         />
       </div>
+      {incomeList?.length ? (
+        <div className="border border-gray-300 mt-4 py-3 px-6 rounded-3xl flex-1">
+          <div className="font-medium text-lg">Income Overview</div>
+          <div className="text-sm text-gray-500">
+            Monitor your income over time and gain insights into your earnings
+          </div>
+
+          <div className="mt-8 ">
+            <HighchartsReact highcharts={Highcharts} options={options} />
+          </div>
+        </div>
+      ) : null}
 
       {incomeList?.length ? (
         <div className="h-83 border border-gray-300 mt-6 py-6 px-6 rounded-3xl overflow-y-scroll no-scrollbar ">
