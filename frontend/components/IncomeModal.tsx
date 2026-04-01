@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -26,22 +26,90 @@ import { INCOME_CATEGORY_CONSTANTS } from "@/utils/constants";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "./ui/calendar";
+import { ITransactionData } from "@/utils/types";
+import { toast } from "sonner";
+import { set } from "date-fns";
+import { addIncome } from "@/services/income.services";
 
-const IncomeModal = () => {
+const IncomeModal = ({
+  onAddIncome,
+  onUpdateIncome,
+  showIncomeModal,
+  setShowIncomeModal,
+  incomeObj,
+  isEditMode,
+  setisEditMode,
+}: {
+  onAddIncome: (incomeData: ITransactionData) => void;
+  onUpdateIncome: (incomeData: ITransactionData) => void;
+  showIncomeModal: boolean;
+  setShowIncomeModal: (value: boolean) => void;
+  incomeObj: ITransactionData | null;
+  isEditMode: boolean;
+  setisEditMode: (value: boolean) => void;
+}) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState("🚀");
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState<Date | null>(null);
-  const [category, setCategory] = useState("");
+  const [selectedEmoji, setSelectedEmoji] = useState(incomeObj?.emoji || "🚀");
+  const [title, setTitle] = useState(incomeObj?.title || "");
+  const [amount, setAmount] = useState(incomeObj?.amount || "");
+  const [date, setDate] = useState<Date | null>(incomeObj?.date || null);
+  const [category, setCategory] = useState(incomeObj?.category || "");
   const [open, setopen] = useState(false);
 
   const handleEmojiSelect = (emojiObj: any) => {
     setSelectedEmoji(emojiObj.emoji);
     setShowEmojiPicker(false);
   };
+
+  const handleAddIncome = () => {
+    const incomeData: ITransactionData = {
+      emoji: selectedEmoji,
+      title,
+      date,
+      amount,
+      category,
+      _id: incomeObj?._id,
+    };
+
+    if (!title || !amount || !date || !category || !selectedEmoji) {
+      toast.error("Please fill in all the fields");
+      return;
+    }
+    if (isEditMode) {
+      onUpdateIncome(incomeData);
+    } else {
+      onAddIncome(incomeData);
+    }
+    setShowIncomeModal(false);
+  };
+
+  const handleResetForm = () => {
+    (setSelectedEmoji("🚀"),
+      setTitle(""),
+      setAmount(""),
+      setDate(null),
+      setCategory(""));
+  };
+
+  const handleOpenChange = () => {
+    setShowIncomeModal(!showIncomeModal);
+    if (!showIncomeModal) {
+      handleResetForm();
+    }
+  };
+
+  useEffect(() => {
+    if (incomeObj) {
+      setSelectedEmoji(incomeObj.emoji);
+      setTitle(incomeObj.title);
+      setAmount(incomeObj.amount);
+      setDate(incomeObj.date);
+      setCategory(incomeObj.category);
+    }
+  }, [incomeObj]);
+
   return (
-    <Dialog>
+    <Dialog open={showIncomeModal} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="cursor-pointer">Add Income</Button>
       </DialogTrigger>
@@ -144,7 +212,9 @@ const IncomeModal = () => {
               Close
             </Button>
           </DialogClose>
-          <Button className="cursor-pointer">Add Income</Button>
+          <Button className="cursor-pointer" onClick={handleAddIncome}>
+            {isEditMode ? "Update Income" : "Add Income"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

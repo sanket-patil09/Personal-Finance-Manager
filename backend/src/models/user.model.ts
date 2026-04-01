@@ -26,9 +26,9 @@ const UserSchema = new mongoose.Schema(
         ref: "Expense",
       },
     ],
-    incomes: [
+    income: [
       {
-        ype: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Income",
       },
     ],
