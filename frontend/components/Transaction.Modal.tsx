@@ -22,38 +22,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { INCOME_CATEGORY_CONSTANTS } from "@/utils/constants";
+import {
+  INCOME_CATEGORY_CONSTANTS,
+  EXPENSE_CATEGORY_CONSTANTS,
+} from "@/utils/constants";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import { ITransactionData } from "@/utils/types";
 import { toast } from "sonner";
-import { set } from "date-fns";
-import { addIncome } from "@/services/income.services";
 
-const IncomeModal = ({
-  onAddIncome,
-  onUpdateIncome,
-  showIncomeModal,
-  setShowIncomeModal,
-  incomeObj,
+const TransactionModal = ({
+  onAddTransaction,
+  onUpdateTransaction,
+  showTransactionModal,
+  setShowTransactionModal,
+  transactionObj,
   isEditMode,
   setisEditMode,
+  type,
 }: {
-  onAddIncome: (incomeData: ITransactionData) => void;
-  onUpdateIncome: (incomeData: ITransactionData) => void;
-  showIncomeModal: boolean;
-  setShowIncomeModal: (value: boolean) => void;
-  incomeObj: ITransactionData | null;
+  onAddTransaction: (transactionData: ITransactionData) => void;
+  onUpdateTransaction: (transactionData: ITransactionData) => void;
+  showTransactionModal: boolean;
+  setShowTransactionModal: (value: boolean) => void;
+  transactionObj: ITransactionData | null;
   isEditMode: boolean;
   setisEditMode: (value: boolean) => void;
+  type: string;
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState(incomeObj?.emoji || "🚀");
-  const [title, setTitle] = useState(incomeObj?.title || "");
-  const [amount, setAmount] = useState(incomeObj?.amount || "");
-  const [date, setDate] = useState<Date | null>(incomeObj?.date || null);
-  const [category, setCategory] = useState(incomeObj?.category || "");
+  const [selectedEmoji, setSelectedEmoji] = useState(
+    transactionObj?.emoji || "🚀",
+  );
+  const [title, setTitle] = useState(transactionObj?.title || "");
+  const [amount, setAmount] = useState(transactionObj?.amount || "");
+  const [date, setDate] = useState<Date | null>(transactionObj?.date || null);
+  const [category, setCategory] = useState(transactionObj?.category || "");
   const [open, setopen] = useState(false);
 
   const handleEmojiSelect = (emojiObj: any) => {
@@ -68,7 +73,7 @@ const IncomeModal = ({
       date,
       amount,
       category,
-      _id: incomeObj?._id,
+      _id: transactionObj?._id,
     };
 
     if (!title || !amount || !date || !category || !selectedEmoji) {
@@ -76,11 +81,11 @@ const IncomeModal = ({
       return;
     }
     if (isEditMode) {
-      onUpdateIncome(incomeData);
+      onUpdateTransaction(incomeData);
     } else {
-      onAddIncome(incomeData);
+      onAddTransaction(incomeData);
     }
-    setShowIncomeModal(false);
+    setShowTransactionModal(false);
   };
 
   const handleResetForm = () => {
@@ -92,33 +97,39 @@ const IncomeModal = ({
   };
 
   const handleOpenChange = () => {
-    setShowIncomeModal(!showIncomeModal);
-    if (!showIncomeModal) {
+    setShowTransactionModal(!showTransactionModal);
+    if (!showTransactionModal) {
       handleResetForm();
     }
   };
 
   useEffect(() => {
-    if (incomeObj) {
-      setSelectedEmoji(incomeObj.emoji);
-      setTitle(incomeObj.title);
-      setAmount(incomeObj.amount);
-      setDate(incomeObj.date);
-      setCategory(incomeObj.category);
+    if (transactionObj) {
+      setSelectedEmoji(transactionObj.emoji);
+      setTitle(transactionObj.title);
+      setAmount(transactionObj.amount);
+      setDate(transactionObj.date);
+      setCategory(transactionObj.category);
     }
-  }, [incomeObj]);
+  }, [transactionObj]);
+
+  const modalTitle = type === "income" ? "Add Income" : "Add Expense";
+  const TransactionCategory =
+    type === "income" ? INCOME_CATEGORY_CONSTANTS : EXPENSE_CATEGORY_CONSTANTS;
+
+  const footerBtnTitle = type === "income" ? "Income " : "Expense";
 
   return (
-    <Dialog open={showIncomeModal} onOpenChange={handleOpenChange}>
+    <Dialog open={showTransactionModal} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer">Add Income</Button>
+        <Button className="cursor-pointer">{modalTitle}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-bold">Add Income</DialogTitle>
+          <DialogTitle className="font-bold">{modalTitle}</DialogTitle>
           <DialogDescription>
-            Add expenses to keep track of your finances and manage your budget
-            in few steps
+            {modalTitle}
+            your finances and manage your budget in few steps
           </DialogDescription>
         </DialogHeader>
 
@@ -140,7 +151,9 @@ const IncomeModal = ({
             <span className="font-bold">Title</span>
             <Input
               className="mt-2"
-              placeholder="Enter Income Title"
+              placeholder={
+                type === "income" ? "Enter Income Title" : "Enter Expense Title"
+              }
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
@@ -160,7 +173,7 @@ const IncomeModal = ({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Category</SelectLabel>
-                  {INCOME_CATEGORY_CONSTANTS.map((item) => (
+                  {TransactionCategory.map((item) => (
                     <SelectItem
                       key={item.title}
                       value={item.title}
@@ -213,11 +226,13 @@ const IncomeModal = ({
             </Button>
           </DialogClose>
           <Button className="cursor-pointer" onClick={handleAddIncome}>
-            {isEditMode ? "Update Income" : "Add Income"}
+            {isEditMode
+              ? `Update ${footerBtnTitle}`
+              : `Update ${footerBtnTitle}`}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
-export default IncomeModal;
+export default TransactionModal;

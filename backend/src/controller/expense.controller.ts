@@ -36,10 +36,10 @@ const addExpense = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Failed to create expense" });
     }
 
-    user.income.push(expense._id);
+    user.expenses.push(expense._id);
     await user.save();
 
-    return res.status(201).json({ message: "Income added successfully" });
+    return res.status(201).json({ message: "Expense added successfully" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -53,7 +53,7 @@ const getUserExpense = async (req: Request, res: Response) => {
     const email = clerkUser.primaryEmailAddress?.emailAddress;
 
     const user = await User.findOne({ email }).populate({
-      path: "expense",
+      path: "expenses",
       select: "-__v -userId",
     });
     if (!user) {
@@ -63,7 +63,7 @@ const getUserExpense = async (req: Request, res: Response) => {
     const userExpense = user.expenses;
 
     return res.status(200).json({
-      Incomes: userExpense,
+      Expense: userExpense,
       message: "Successfully retrieved user expense",
     });
   } catch (error) {

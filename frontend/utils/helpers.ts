@@ -7,10 +7,10 @@ import {
 } from "./types";
 import { fetchExpense } from "@/services/expense.services";
 
-const fetchTransactionsList = (list: ITransactionData[]) => {
+const fetchTransactionsList = (list: ITransactionData[] = []) => {
   const chartData = list.map((t: ITransactionData) => {
     return {
-      x: new Date(t.date || ""),
+      x: t.date ? new Date(t.date) : new Date(),
       y: Number(t.amount),
       type: t.transactionType,
       icon: t.emoji,
@@ -130,17 +130,17 @@ const getChartOptions = (
 };
 
 const getDashboardValues = async (token: string) => {
-  const incomeList = await fetchIncome(token);
-  const expenseList = await fetchExpense(token);
+  const incomeList = (await fetchIncome(token)) || [];
+  const expenseList = (await fetchExpense(token)) || [];
 
   let incomeValue = 0;
   let expenseValue = 0;
 
-  incomeList.forEach((income: ITransactionData) => {
+  incomeList?.forEach((income: ITransactionData) => {
     incomeValue += Number(income.amount);
   });
 
-  expenseList.forEach((expense: ITransactionData) => {
+  expenseList?.forEach((expense: ITransactionData) => {
     expenseValue += Number(expense.amount);
   });
 

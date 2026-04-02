@@ -1,5 +1,7 @@
+import Expense from "@/components/expense";
+
 const ExpensePage = () => {
-  return <h1>Expense</h1>;
+  return <Expense />;
 };
 
 export default ExpensePage;
