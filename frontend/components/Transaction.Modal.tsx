@@ -117,7 +117,7 @@ const TransactionModal = ({
       setAmount(transactionObj.amount);
       setDate(transactionObj.date);
       setCategory(transactionObj.category);
-      setTransactionType(transactionObj.transactionType);
+      setTransactionType(transactionObj.transactionType || "");
     }
   }, [transactionObj]);
 

@@ -1,5 +1,7 @@
-const App = () => {
-  return <h1 className="text-black">App</h1>;
+import Dashboard from "@/components/dashboard";
+
+const DashboardPage = () => {
+  return <Dashboard />;
 };
 
-export default App;
+export default DashboardPage;
