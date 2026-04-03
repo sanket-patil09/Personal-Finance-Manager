@@ -1,7 +1,8 @@
 import Expense from "@/components/expense";
+import { withAuth } from "@/hoc/withAuth";
 
 const ExpensePage = () => {
   return <Expense />;
 };
 
-export default ExpensePage;
+export default withAuth(ExpensePage);
