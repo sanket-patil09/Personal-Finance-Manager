@@ -25,6 +25,7 @@ import {
 import {
   INCOME_CATEGORY_CONSTANTS,
   EXPENSE_CATEGORY_CONSTANTS,
+  TRANSACTION_CATEGORY_CONSTANTS,
 } from "@/utils/constants";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ChevronDownIcon } from "lucide-react";
@@ -41,6 +42,7 @@ const TransactionModal = ({
   isEditMode,
   setisEditMode,
   type,
+  showTransactionType = false,
 }: {
   onAddTransaction: (transactionData: ITransactionData) => void;
   onUpdateTransaction: (transactionData: ITransactionData) => void;
@@ -50,6 +52,7 @@ const TransactionModal = ({
   isEditMode: boolean;
   setisEditMode: (value: boolean) => void;
   type: string;
+  showTransactionType?: boolean;
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState(
@@ -60,6 +63,9 @@ const TransactionModal = ({
   const [date, setDate] = useState<Date | null>(transactionObj?.date || null);
   const [category, setCategory] = useState(transactionObj?.category || "");
   const [open, setopen] = useState(false);
+  const [transactionType, setTransactionType] = useState(
+    transactionObj?.transactionType || "",
+  );
 
   const handleEmojiSelect = (emojiObj: any) => {
     setSelectedEmoji(emojiObj.emoji);
@@ -74,6 +80,7 @@ const TransactionModal = ({
       amount,
       category,
       _id: transactionObj?._id,
+      transactionType,
     };
 
     if (!title || !amount || !date || !category || !selectedEmoji) {
@@ -110,14 +117,27 @@ const TransactionModal = ({
       setAmount(transactionObj.amount);
       setDate(transactionObj.date);
       setCategory(transactionObj.category);
+      setTransactionType(transactionObj.transactionType);
     }
   }, [transactionObj]);
 
-  const modalTitle = type === "income" ? "Add Income" : "Add Expense";
+  const modalTitle =
+    type === "income"
+      ? "Add Income "
+      : type === "transaction"
+        ? "Add Transaction "
+        : "Add Expense ";
   const TransactionCategory =
-    type === "income" ? INCOME_CATEGORY_CONSTANTS : EXPENSE_CATEGORY_CONSTANTS;
+    type === "income" || transactionType === "income"
+      ? INCOME_CATEGORY_CONSTANTS
+      : EXPENSE_CATEGORY_CONSTANTS;
 
-  const footerBtnTitle = type === "income" ? "Income " : "Expense";
+  const footerBtnTitle =
+    type === "income"
+      ? "Income"
+      : type === "transaction"
+        ? "Transaction"
+        : "Expense";
 
   return (
     <Dialog open={showTransactionModal} onOpenChange={handleOpenChange}>
@@ -129,7 +149,7 @@ const TransactionModal = ({
           <DialogTitle className="font-bold">{modalTitle}</DialogTitle>
           <DialogDescription>
             {modalTitle}
-            your finances and manage your budget in few steps
+            to the list in just few steps
           </DialogDescription>
         </DialogHeader>
 
@@ -147,12 +167,41 @@ const TransactionModal = ({
               </div>
             ) : null}
           </div>
+
+          {showTransactionType ? (
+            <div className="w-full">
+              <span className="font-medium">Transaction</span>
+              <Select
+                onValueChange={(value) => setTransactionType(value)}
+                disabled={isEditMode}
+              >
+                <SelectTrigger className="mt-2 w-full cursor-pointer">
+                  <SelectValue placeholder="Select Transaction Type" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    <SelectLabel>Label</SelectLabel>
+                    {TRANSACTION_CATEGORY_CONSTANTS.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.value}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+
           <div className="w-full">
             <span className="font-bold">Title</span>
             <Input
               className="mt-2"
               placeholder={
-                type === "income" ? "Enter Income Title" : "Enter Expense Title"
+                type === "income"
+                  ? "Enter Income Title"
+                  : type === "transaction"
+                    ? "Enter Transaction Title"
+                    : "Enter Expense Title"
               }
               value={title}
               onChange={(e) => {
@@ -170,7 +219,7 @@ const TransactionModal = ({
               <SelectTrigger className="mt-2 w-full cursor-pointer">
                 <SelectValue placeholder="Select a Category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectGroup>
                   <SelectLabel>Category</SelectLabel>
                   {TransactionCategory.map((item) => (
