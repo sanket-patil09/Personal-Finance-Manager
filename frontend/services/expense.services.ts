@@ -47,7 +47,7 @@ const updateExpense = async (
   }
 };
 
-const deleteExpense = async (token: String, id: String) => {
+const deleteExpense = async (token: string, id: string) => {
   try {
     await axios.delete(`${APP_API_URL}/delete-expense/${id}`, {
       headers: {

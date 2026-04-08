@@ -105,7 +105,7 @@ const Income = () => {
           transactionObj={incomeObj}
           isEditMode={isEditMode}
           setisEditMode={setIsEditMode}
-          type="expense"
+          type="income"
         />
       </div>
       {incomeList?.length ? (

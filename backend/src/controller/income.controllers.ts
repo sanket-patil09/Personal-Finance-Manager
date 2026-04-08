@@ -135,7 +135,7 @@ const deleteIncome = async (req: Request, res: Response) => {
     }
 
     const deletedIncome = await Income.findOneAndDelete({
-      id: id,
+      _id: id,
       userId: user._id,
     });
 

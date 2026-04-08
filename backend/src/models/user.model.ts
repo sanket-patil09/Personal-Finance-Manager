@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { ref } from "node:process";
 
 const UserSchema = new mongoose.Schema(
   {

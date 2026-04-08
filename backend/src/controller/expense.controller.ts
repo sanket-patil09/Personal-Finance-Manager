@@ -135,7 +135,7 @@ const deleteExpense = async (req: Request, res: Response) => {
     }
 
     const deletedExpense = await Expense.findOneAndDelete({
-      id: id,
+      _id: id,
       userId: user._id,
     });
 

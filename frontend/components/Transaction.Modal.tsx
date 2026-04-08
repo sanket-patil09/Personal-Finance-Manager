@@ -66,6 +66,10 @@ const TransactionModal = ({
   const [transactionType, setTransactionType] = useState(
     transactionObj?.transactionType || "",
   );
+  const [errors, setErrors] = useState({
+    title: "",
+    amount: "",
+  });
 
   const handleEmojiSelect = (emojiObj: any) => {
     setSelectedEmoji(emojiObj.emoji);
@@ -110,6 +114,42 @@ const TransactionModal = ({
     }
   };
 
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    if (name === "title") {
+      if (!value) {
+        error = "Title is required";
+      } else if (/^\d+$/.test(value)) {
+        error = "Title cannot be only numbers";
+      }
+    }
+
+    if (name === "amount") {
+      if (!value) {
+        error = "Amount is required";
+      } else if (isNaN(Number(value))) {
+        error = "Amount must be a number";
+      } else if (Number(value) <= 0) {
+        error = "Amount must be greater than 0";
+      }
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
+  };
+
+  const isFormValid =
+    title &&
+    amount &&
+    date &&
+    category &&
+    selectedEmoji &&
+    !errors.title &&
+    !errors.amount;
+
   useEffect(() => {
     if (transactionObj) {
       setSelectedEmoji(transactionObj.emoji);
@@ -123,10 +163,11 @@ const TransactionModal = ({
 
   const modalTitle =
     type === "income"
-      ? "Add Income "
-      : type === "transaction"
-        ? "Add Transaction "
-        : "Add Expense ";
+      ? "Add Income"
+      : type === "expense"
+        ? "Add Expense"
+        : "Add Transaction";
+
   const TransactionCategory =
     type === "income" || transactionType === "income"
       ? INCOME_CATEGORY_CONSTANTS
@@ -195,19 +236,18 @@ const TransactionModal = ({
           <div className="w-full">
             <span className="font-bold">Title</span>
             <Input
-              className="mt-2"
-              placeholder={
-                type === "income"
-                  ? "Enter Income Title"
-                  : type === "transaction"
-                    ? "Enter Transaction Title"
-                    : "Enter Expense Title"
-              }
+              className={`mt-2 ${errors.title ? "border-red-500" : ""}`}
+              placeholder="Enter Title"
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
+                validateField("title", e.target.value); // 🔥 real-time
               }}
             />
+
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
 
           <div className="w-full">
@@ -238,11 +278,18 @@ const TransactionModal = ({
           <div className="w-full">
             <span className="font-medium">Amount</span>
             <Input
-              className="mt-2"
+              className={`mt-2 ${errors.amount ? "border-red-500" : ""}`}
               placeholder="0.00"
-              onChange={(e) => setAmount(e.target.value)}
               value={amount}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                validateField("amount", e.target.value); // 🔥 real-time
+              }}
             />
+
+            {errors.amount && (
+              <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
+            )}
           </div>
 
           <div className="w-full flex flex-col gap-2">
@@ -259,6 +306,9 @@ const TransactionModal = ({
                   mode="single"
                   selected={date ?? undefined}
                   captionLayout="dropdown"
+                  disabled={{
+                    after: new Date(new Date().setHours(0, 0, 0, 0)),
+                  }}
                   onSelect={(date) => {
                     setDate(date ?? null);
                     setopen(false);
@@ -274,10 +324,12 @@ const TransactionModal = ({
               Close
             </Button>
           </DialogClose>
-          <Button className="cursor-pointer" onClick={handleAddIncome}>
-            {isEditMode
-              ? `Update ${footerBtnTitle}`
-              : `Update ${footerBtnTitle}`}
+          <Button
+            className="cursor-pointer"
+            onClick={handleAddIncome}
+            disabled={!isFormValid} // ✅ THIS LINE
+          >
+            {isEditMode ? `Update ${footerBtnTitle}` : `Add ${footerBtnTitle}`}
           </Button>
         </DialogFooter>
       </DialogContent>
